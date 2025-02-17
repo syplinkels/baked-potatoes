@@ -1,3 +1,5 @@
+const letters = require('./letters.js');  // Make sure this is at the top of the file
+
 class GameController {
     static InitializeShips() {
         var colors = require("cli-color");
@@ -17,6 +19,12 @@ class GameController {
             throw "The shooting position is not defined";
         if (ships == undefined)
             throw "No ships defined";
+
+        // Check if the shot is within valid range
+        if (!letters.hasOwnProperty(shot.column) || shot.row < 1 || shot.row > 8) {
+            throw "Shot position is out of bounds!";
+        }
+
         var returnvalue = false;
         ships.forEach(function (ship) {
             ship.positions.forEach(position => {
@@ -25,10 +33,6 @@ class GameController {
             });
         });
         return returnvalue;
-    }
-
-    static isShipValid(ship) {
-        return ship.positions.length == ship.size;
     }
 }
 

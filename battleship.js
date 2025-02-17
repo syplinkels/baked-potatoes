@@ -32,7 +32,7 @@ class Battleship {
         this.InitializeGame();
         this.StartGame();
     }
-
+    
     StartGame() {
         console.clear();
         console.log("                  __");
@@ -94,10 +94,31 @@ class Battleship {
     }
 
     static ParsePosition(input) {
-        var letter = letters.get(input.toUpperCase().substring(0, 1));
-        var number = parseInt(input.substring(1, 2), 10);
-        return new position(letter, number);
+        let letter;
+        let number;
+    
+        // Keep prompting until the input is valid
+        while (true) {
+            letter = input.toUpperCase().substring(0, 1);
+            number = parseInt(input.substring(1), 10);  // Ensure to parse the full row number
+    
+            // Check if the letter is within A to H and number is between 1 and 8
+            if (letters.hasOwnProperty(letter) && number >= 1 && number <= 8) {
+                break;  // Exit the loop if the position is valid
+            } else {
+                // Provide specific error messages based on what's invalid
+                if (!letters.hasOwnProperty(letter)) {
+                    console.log("Invalid column. Please enter a letter between A and H.");
+                } else if (number < 1 || number > 8 || isNaN(number)) {
+                    console.log("Invalid row. Please enter a number between 1 and 8.");
+                }
+                input = readline.question("Enter a valid position (A1 to H8): "); // Ask for a new input only if invalid
+            }
+        }
+    
+        return new position(letters.get(letter), number);
     }
+    
 
     GetRandomPosition() {
         var rows = 8;
