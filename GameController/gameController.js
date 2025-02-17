@@ -26,6 +26,10 @@ class GameController {
             ship.positions.forEach(position => {
                 if (position.row == shot.row && position.column == shot.column) {
                     isHit = true;
+                    position.isHit = true;
+                }
+                if (ship.isSunk()) {
+                    console.log("Ship is sunk.")
                 }
             });
         });

@@ -75,8 +75,12 @@ class Battleship {
             }
 
             console.log(isHit ? "Yeah ! Nice hit !" : "Miss");
+            if (this.IsGameOver(false)) {
+                console.log("You Won!!!")
+            }
 
-            this.DisplayGame(1);
+
+            // this.DisplayGame(1);
             var computerPos = this.GetRandomPosition();
             var isHit = this.gameController.CheckIsHit(this.myFleet, computerPos, true);
 
@@ -96,8 +100,13 @@ class Battleship {
                 console.log("                 -\\  \\     /  /-");
                 console.log("                   \\  \\   /  /");
             }
+
+            if (this.IsGameOver(true)) {
+                console.log("You Lost :(")
+            }
+
         }
-        while (true);
+        while (!this.IsGameOver());
     }
 
     static ParsePosition(input) {
@@ -111,7 +120,8 @@ class Battleship {
         var lines = 8;
         var rndColumn = Math.floor((Math.random() * lines));
         var letter = letters.get(rndColumn + 1);
-        var number = Math.floor((Math.random() * rows));
+        var number = Math.floor((Math.random() * rows + 1));
+ 
         var result = new position(letter, number);
         return result;
     }
@@ -150,7 +160,7 @@ class Battleship {
         this.enemyFleet[1].addPosition(new position(letters.E, 6));
         this.enemyFleet[1].addPosition(new position(letters.E, 7));
         this.enemyFleet[1].addPosition(new position(letters.E, 8));
-        this.enemyFleet[1].addPosition(new position(letters.E, 9));
+        this.enemyFleet[1].addPosition(new position(letters.E, 5));
 
         this.enemyFleet[2].addPosition(new position(letters.A, 3));
         this.enemyFleet[2].addPosition(new position(letters.B, 3));
@@ -205,6 +215,11 @@ class Battleship {
             console.log(row);
         }
         console.log();
+    }
+
+    IsGameOver(isPlayer) {
+        const fleet = isPlayer ? this.myFleet : this.enemyFleet;
+        return fleet.every(ship => ship.isSunk());
     }
 }
 
