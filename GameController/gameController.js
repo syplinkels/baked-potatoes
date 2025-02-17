@@ -1,5 +1,10 @@
 class GameController {
-    static InitializeShips() {
+    constructor() {
+        this.myShots = [];
+        this.enemyShots = [];
+    }
+
+    InitializeShips() {
         var colors = require("cli-color");
         const Ship = require("./ship.js");
         var ships = [
@@ -12,23 +17,31 @@ class GameController {
         return ships;
     }
 
-    static CheckIsHit(ships, shot) {
-        if (shot == undefined)
-            throw "The shooting position is not defined";
-        if (ships == undefined)
-            throw "No ships defined";
-        var returnvalue = false;
-        ships.forEach(function (ship) {
+    CheckIsHit(ships, shot, isPlayerShot = true) {
+        if (!shot) throw "The shooting position is not defined";
+        if (!ships) throw "No ships defined";
+
+        let isHit = false;
+        ships.forEach(ship => {
             ship.positions.forEach(position => {
-                if (position.row == shot.row && position.column == shot.column)
-                    returnvalue = true;
+                if (position.row == shot.row && position.column == shot.column) {
+                    isHit = true;
+                }
             });
         });
-        return returnvalue;
+
+        const shotRecord = { position: shot, isHit: isHit };
+        if (isPlayerShot) {
+            this.myShots.push(shotRecord);
+        } else {
+            this.enemyShots.push(shotRecord);
+        }
+
+        return isHit;
     }
 
-    static isShipValid(ship) {
-        return ship.positions.length == ship.size;
+    isShipValid(ship) {
+        return ship.positions.length === ship.size;
     }
 }
 
