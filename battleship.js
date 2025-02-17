@@ -1,13 +1,18 @@
 const { Worker, isMainThread } = require('worker_threads');
 const readline = require('readline-sync');
-const gameController = require("./GameController/gameController.js");
+const GameController = require("./GameController/gameController.js");
 const cliColor = require('cli-color');
 const beep = require('beepbeep');
 const position = require("./GameController/position.js");
 const letters = require("./GameController/letters.js");
+
 let telemetryWorker;
 
 class Battleship {
+    constructor() {
+        this.gameController = new GameController();
+    }
+
     start() {
         telemetryWorker = new Worker("./TelemetryClient/telemetryClient.js");   
 
@@ -28,7 +33,7 @@ class Battleship {
         console.log(cliColor.magenta("|                        Welcome to Battleship                         BB-61/"));
         console.log(cliColor.magenta(" \\_________________________________________________________________________|"));
         console.log();
-
+        
         this.InitializeGame();
         this.StartGame();
     }
@@ -45,13 +50,14 @@ class Battleship {
         console.log("  |     /_\\'");
         console.log("   \\    \\_/");
         console.log("    \"\"\"\"");
-
+        
         do {
             console.log();
+            this.DisplayGame(0);
             console.log("Player, it's your turn");
             console.log("Enter coordinates for your shot :");
             var position = Battleship.ParsePosition(readline.question());
-            var isHit = gameController.CheckIsHit(this.enemyFleet, position);
+            var isHit = this.gameController.CheckIsHit(this.enemyFleet, position, false);
 
             telemetryWorker.postMessage({eventName: 'Player_ShootPosition', properties:  {Position: position.toString(), IsHit: isHit}});
 
@@ -70,8 +76,9 @@ class Battleship {
 
             console.log(isHit ? "Yeah ! Nice hit !" : "Miss");
 
+            this.DisplayGame(1);
             var computerPos = this.GetRandomPosition();
-            var isHit = gameController.CheckIsHit(this.myFleet, computerPos);
+            var isHit = this.gameController.CheckIsHit(this.myFleet, computerPos, true);
 
             telemetryWorker.postMessage({eventName: 'Computer_ShootPosition', properties:  {Position: computerPos.toString(), IsHit: isHit}});
 
@@ -115,7 +122,7 @@ class Battleship {
     }
 
     InitializeMyFleet() {
-        this.myFleet = gameController.InitializeShips();
+        this.myFleet = this.gameController.InitializeShips();
 
         console.log("Please position your fleet (Game board size is from A to H and 1 to 8) :");
 
@@ -132,7 +139,7 @@ class Battleship {
     }
 
     InitializeEnemyFleet() {
-        this.enemyFleet = gameController.InitializeShips();
+        this.enemyFleet = this.gameController.InitializeShips();
 
         this.enemyFleet[0].addPosition(new position(letters.B, 4));
         this.enemyFleet[0].addPosition(new position(letters.B, 5));
@@ -155,6 +162,49 @@ class Battleship {
 
         this.enemyFleet[4].addPosition(new position(letters.C, 5));
         this.enemyFleet[4].addPosition(new position(letters.C, 6));
+    }
+
+    DisplayGame(view) {
+        function createBoard(fleet, ownBoard) {
+            let board = Array(8).fill(null).map(() => Array(8).fill('.'));
+            fleet.forEach(ship => {
+                ship.positions.forEach(pos => {
+                    let row = pos.row - 1;
+                    let col = pos.column - 1;
+                    if (row >= 0 && row < 8 && col >= 0 && col < 8) {
+                        board[row][col] = ownBoard ? 'S' : '.';
+                    }
+                });
+            });
+            return board;
+        };
+
+        function addShots(board, shots) {
+            shots.forEach(shot => {
+                let row = shot.position.row - 1;
+                let col = shot.position.column - 1;
+                board[row][col] = shot.isHit ? 'X' : 'O';
+            });
+            return board;
+        }
+
+        let myBoard = createBoard(this.myFleet, true);
+        let enemyBoard = createBoard(this.enemyFleet, false);
+
+        addShots(myBoard, this.gameController.myShots);
+        addShots(enemyBoard, this.gameController.enemyShots);
+
+        console.log("\nYour Board:                             Enemy Board:");
+        console.log("  A B C D E F G H                      A B C D E F G H");
+
+        for (let i = 0; i < 8; i++) {
+            let row = `${i + 1} `;
+            myBoard[i].forEach(cell => row += `${cell} `);
+            row += `                   ${i + 1} `;
+            enemyBoard[i].forEach(cell => row += `${cell} `);
+            console.log(row);
+        }
+        console.log();
     }
 }
 
