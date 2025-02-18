@@ -13,6 +13,99 @@ class Battleship {
         this.gameController = new GameController();
     }
 
+    static TriggerExplosion() {
+// Define the frames of the animation
+const animationFrames = [
+    `
+           |    |    |  
+         )_)  )_)  )_)  
+        )___))___))___)\\  
+       )____)____)_____)\\\\  
+    _____|____|____|____\\\\\\__  
+    \\                   /  
+  ~~~~~~~~~~~~~~~~~~~~~~~~~
+`,
+`
+  . . . BOOM . . . 
+  _.-^^---....,,--       
+_--                  --_  
+>)
+|                         |  
+\\._                   _./  
+ \`\`\`--. . , ; .--'''       
+       | |   |              
+       | |  || 
+       |$%&%$|  
+       | ;  :|  
+_____/____|___\\_____ 
+~~~ (_____/    |      \\_____)~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+`,
+`
+    |    |    |  
+  )_)  )_)  )_)  
+ )___))___))___)\\  
+)____)____)_____)\\\\  
+_____|____|____|____\\\\\\__  
+\\       BOOM!        /  
+~~~~~~~~~~~~~~~~~~~~~~~~~
+`,
+`
+    |    |  
+  )_)  )_)  
+ )___))___) 
+)____)____)_____)\\  
+_____|____|____|____\\\\\\__  
+\\       BOOM!         /  
+~~~~~~~~~~~~~~~~~~~~~~~~~
+`,
+`
+    |  
+  )_)  
+ )___)) 
+)____)____)_____)  
+_____|____|____|____\\  
+\\         BOOM!       /  
+~~~~~~~~~~~~~~~~~~~~~~~  
+`,
+`
+    |  
+  )_)  
+ )___))  
+)____)____)_____)  
+_____|____|____|____\\  
+~~~~/\\~~~~~~~~~~~~~~~~~~\\/~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~/\\~~~~~~~~~~~~~
+   **THE ENEMY IS OBLITERATED!**  
+        **TOTAL VICTORY**  
+  `
+];
+
+function showAnimationFrame(frameIndex) {
+    console.clear();
+    console.log(animationFrames[frameIndex]);
+}
+
+function displayAnimation() {
+    let currentFrame = 0;
+
+    // Show the animation frame by frame
+    const interval = setInterval(() => {
+        showAnimationFrame(currentFrame);
+
+        // If we've displayed all frames, stop the interval
+        currentFrame++;
+        if (currentFrame >= animationFrames.length) {
+            clearInterval(interval);
+        }
+    }, 1500);  // Delay of 1500ms (1.5 seconds) between each frame
+}
+
+displayAnimation();
+    }
+  
+  
     start() {
         telemetryWorker = new Worker("./TelemetryClient/telemetryClient.js");   
 
@@ -74,10 +167,13 @@ class Battleship {
                 console.log("                   \\  \\   /  /");
             }
 
-            console.log(isHit ? "Yeah ! Nice hit !" : "Miss");
-            if (this.IsGameOver(false)) {
-                console.log("You Won!!!")
-            }
+        
+    console.log(isHit ? "Yeah ! Nice hit !" : "Miss");
+
+    if (this.IsGameOver(false)) {
+        console.log("You Won!!!");
+        Battleship.TriggerExplosion();  // Call the explosion animation when the game is over
+    }
 
 
             // this.DisplayGame(1);
